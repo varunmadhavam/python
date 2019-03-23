@@ -24,6 +24,7 @@ class goavrserial:
                 for x in range(0,len(data)):
                     self.queue.putdata(data[x])
                     print("put data in queue")
+                    print(data[x])
 
     def writeserialdata(self, arrayofbytes):
         print("wrting data")
