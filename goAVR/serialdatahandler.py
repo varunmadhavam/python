@@ -20,15 +20,12 @@ class goavrserial:
         while not self.stop.is_set():
             data = self.ser.read(9999)
             if len(data) > 0:
-                print("got data")
                 for x in range(0,len(data)):
                     self.queue.putdata(data[x])
-                    print("put data in queue")
-                    print(data[x])
+                    print("put data in queue : "+str(data[x]))
 
     def writeserialdata(self, arrayofbytes):
-        print("wrting data")
-        print(arrayofbytes)
+        print("wrting data : "+str(arrayofbytes))
         self.ser.write(arrayofbytes)
 
     def run(self):

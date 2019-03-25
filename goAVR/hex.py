@@ -14,7 +14,7 @@ class hex:
                     if line[7:9] == "01":
                         break
                     elif line[7:9] == "00":
-                        self.hexstring+=line[9:len(line)-4]
+                        self.hexstring+=line[9:len(line)-3]
                         if self.isFirstLine == 1:
                             self.isFirstLine = 0
                             if line[3:7] != "0000":
