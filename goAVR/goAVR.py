@@ -12,7 +12,7 @@ if  len (sys.argv) != 3 :
     print("Not all parameters passed in command line")
     sys.exit (1)
 
-hexdata = hex("/home/varun/coding/c/avr/blinky8/bin/blinky8.hex")
+hexdata = hex("blinky8.hex")
 #hexdata = hex("/home/varun/coding/c/avr/goAvrC/bin/goAvrC.hex")
 
 if sys.argv[1] == "arduino":
@@ -29,8 +29,8 @@ if sys.argv[1] == "arduino":
     stopping.set()
 
 elif sys.argv[1] == "rpi":
-    chip=rpiavr(0,0,32,0,8192,0,0,20,0,10,hexdata)
-    mode=fsm(2,chip)
+    chip=rpiavr("atmega8",[0x1E,0x93,0x07],32,4,8192,512,5,20,10,10,hexdata)
+    mode=fsm(0,chip)
     mode.run()
 
 else:

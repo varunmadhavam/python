@@ -10,21 +10,17 @@ class fsm:
             self.avr.leave_programming()
         else:
             print("Could not enter programming mode")
+            self.avr.leave_programming()
     
-    def write_flash(self):
+    def write_flash(self,startaddress):
         if self.avr.enable_programming():
-            if self.avr.chip_erase():
-                sleep(self.avr.twd_erase/1000)
-                self.avr.leave_programming()
-                if self.avr.enable_programming():
-                    self.avr.write_flash()
-                    self.avr.leave_programming()
-                else:
-                    print("error entering programming mode after chip erase")
-            else:
-                print("error erasing chip")
+            sleep(self.avr.twd_flash/1000)
+            self.avr.write_flash(startaddress)
+            self.avr.leave_programming()
+            print("Successfully uploaded flash")
         else:
-            print("Could not enter programming mode")
+            print("error entering programming mode")
+            self.avr.leave_programming()
 
     def read_flash(self):
         if self.avr.enable_programming():
@@ -32,20 +28,33 @@ class fsm:
             self.avr.leave_programming()
         else:
             print("Could not enter programming mode")
+            self.avr.leave_programming()
 
     def erase_chip(self):
-        print("chip erase cycle initiated")
-        if self.avr.chip_erase():
-            sleep(self.avr.twd_erase/1000)
-            print("chip erased successfully")
-            self.avr.leave_programming()
+        if self.avr.enable_programming():
+            print("chip erase cycle initiated")
+            if self.avr.chip_erase():
+                sleep(self.avr.twd_erase/1000)
+                print("chip erased successfully")
+                self.avr.leave_programming()
+                return True
+            else:
+                print("Error erasing chip")
+                self.avr.leave_programming()
+                return False
         else:
-            print("Error erasing chip")
+            print("Could not enter programming mode")
+            self.avr.leave_programming()
+            return False
 
 
     def run(self):
         if self.mode == 0 :
-            self.write_flash()
+            if self.erase_chip():
+                print("flash erased. Trying to upload flash")
+                self.write_flash(0)
+            else:
+                print("error trying to erase flash")
         elif self.mode == 1 :
             self.read_chipid()
         elif self.mode == 2:

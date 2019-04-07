@@ -2,11 +2,11 @@ from struct import *
 from time import sleep
 from rpi.rpispi import rpispi
 class rpiavr:
-    def __init__(self,chipname,chipcode,wordsize_flash,wordsize_eeprom,flash_size,eeprom_size,twd_fuse,twd_flash,twd_eeprom,twd_erase,hex):
+    def __init__(self,chipname,chipcode,pagesize_flash,pagesize_eeprom,flash_size,eeprom_size,twd_fuse,twd_flash,twd_eeprom,twd_erase,hex):
         self.chipname=chipname
         self.chipcode=chipcode
-        self.wordsize_flash=wordsize_flash
-        self.wordsize_eeprom=wordsize_eeprom
+        self.pagesize_flash=pagesize_flash
+        self.pagesize_eeprom=pagesize_eeprom
         self.flash_size=flash_size
         self.eeprom_size=eeprom_size
         self.twd_fuse=twd_fuse
@@ -18,6 +18,7 @@ class rpiavr:
 
     def enable_programming(self):
         self.spi.toggle_reset()
+        sleep(1)
         res=self.spi.spi_transfer([0xAC,0x53,0x00,0x00])
         if res[2] == 83: #0x53
             print("Programming mode entered successfully")
@@ -46,43 +47,29 @@ class rpiavr:
         return True
 
 
-    def write_flash(self):
-        self.serialport.writeserialdata(b'\x98')
-        self.serialport.writeserialdata(bytes(pack(">B",self.wordsize_flash)))
-        self.serialport.writeserialdata(bytes(pack(">B",self.twd_flash)))
-        self.serialport.writeserialdata(b'\x00')
-        self.serialport.writeserialdata(b'\x00')
+    def write_flash(self,startaddress):
         program=self.hex.readhex()
         if(len(program)>self.flash_size):
             print("error....program size more than flash size")
             return
-        self.serialport.writeserialdata(bytes(pack(">B",len(program)>>8)))
-        self.serialport.writeserialdata(bytes(pack(">B",len(program)&0xff)))
         k=0
         j=0
+        i=0
         while k <= (len(program)-2):
-            print("k is "+str(k))
-            self.serialport.writeserialdata(bytes(pack(">B",program[k])))
-            self.serialport.writeserialdata(bytes(pack(">B",program[k+1])))
+            self.spi.spi_transfer([0x40,0x00,int.from_bytes(pack(">B",j&0xff),"little"),int.from_bytes(pack(">B",program[k]),"little")])
+            self.spi.spi_transfer([0x48,0x00,int.from_bytes(pack(">B",j&0xff),"little"),int.from_bytes(pack(">B",program[k+1]),"little")])
             k+=2
-            if((k%(self.wordsize_flash*2))==0):
-                print("k waiting for data is "+str(k))
-                retcode=self.dataqueue.getdata(1)
-                if not (bytes([retcode[0]]) == b'\x80'):
-                   print("error unidentified sync token recieved.")
-                   break
-                else:
-                    print("reached a page buffer..continueing")
-            retcode=self.dataqueue.getdata(1)
-            if (bytes([retcode[0]]) == b'\x98'):
-                continue
-            else:
-                print("Error Not recieved sysnc after writing 2 bytes of flash")
-                break
-        print("waiting for last sycn byte")
-        retcode=self.dataqueue.getdata(1)
-        if not (bytes([retcode[0]]) == b'\x88'):
-                   print("error unidentified sync token recieved.")
+            j=j+1
+            if((k%(self.pagesize_flash*2))==0):
+                sleep(self.twd_flash/1000)
+                self.spi.spi_transfer([0x4C,int.from_bytes(pack(">B",i>>8),"little"),int.from_bytes(pack(">B",i&0xff),"little"),0x00])
+                sleep(self.twd_flash/1000)
+                j=0
+                i=i+self.pagesize_flash
+        if j < self.pagesize_flash and j > 0 :
+                self.spi.spi_transfer([0x4C,int.from_bytes(pack(">B",i>>8),"little"),int.from_bytes(pack(">B",i&0xff),"little"),0x00])
+                sleep(self.twd_flash/1000)
+
 
     def read_flash(self):
         arr = bytearray()

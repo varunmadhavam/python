@@ -18,10 +18,10 @@ class rpispi:
         GPIO.output(self.reset,GPIO.LOW)
 
     def unhold_reset(self):
-        GPIO.output(self.reset,GPIO.LOW)
+        GPIO.output(self.reset,GPIO.HIGH)
     
     def hold_reset(self):
-        GPIO.output(self.reset,GPIO.HIGH)
+        GPIO.output(self.reset,GPIO.LOW)
     
     def spi_transfer(self,fourbytes):
         return self.spi.xfer(fourbytes)
