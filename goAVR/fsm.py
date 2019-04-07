@@ -50,5 +50,7 @@ class fsm:
             self.read_chipid()
         elif self.mode == 2:
             self.read_flash()
+        elif self.mode == 3:
+            self.erase_chip()
         else:
             print("Unknow mode")
