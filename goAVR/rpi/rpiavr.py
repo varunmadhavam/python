@@ -17,43 +17,30 @@ class rpiavr:
         self.spi=rpispi()
 
     def enable_programming(self):
-        self.serialport.writeserialdata(b'\x91')
-        data=self.dataqueue.getdata(2)
-        if bytes([data[0]]) == b'\x00':
-            if bytes([data[1]]) == b'\x02':
-                return True
-            else:
-                print("Error : Unexpected return code")
-                return False
-        elif bytes([data[0]]) == b'\x01':
-            print("Error : Sync error")
-            return False
+        self.spi.toggle_reset()
+        res=self.spi.spi_transfer([0xAC,0x53,0x00,0x00])
+
+        if res[2] == 83: #0x53
+            print("Programming mode entered successfully")
+            return True
         else:
             print("Error : Unexpected byte recieved while trying to intialize programming mode")
-            print(bytes([data[0]]))
-            print(b'\x00')
-            return False
-        print("Queue after enable programming : "+str(self.dataqueue.qsize()))
-    
-    def leave_programming(self):
-        self.serialport.writeserialdata(b'\x92')
-        data=self.dataqueue.getdata(2)
-        if bytes([data[0]]) == b'\x00':
-            if bytes([data[1]]) == b'\x03':
-                return True
-            else:
-                print("Error : Unexpected return code")
-                return False
-        elif bytes([data[0]]) == b'\x01':
-            print("Error while leaving programming mode")
-            return False
-        else:
             return False
 
+    def leave_programming(self):
+        print("Leaving Programming Mode")
+        self.spi.unhold_reset()
+        return True
+
     def read_signature(self):
-        self.serialport.writeserialdata(b'\x93')
-        data=self.dataqueue.getdata(3)
-        return data
+        arr = bytearray()
+        res=self.spi.spi_transfer([0x30,0x00,0x00,0x00])
+        arr.append(res[3])
+        res=self.spi.spi_transfer([0x30,0x00,0x01,0x00])
+        arr.append(res[3])
+        res=self.spi.spi_transfer([0x30,0x00,0x02,0x00])
+        arr.append(res[3])
+        return arr
 
     def chip_erase(self):
         self.serialport.writeserialdata(b'\x94')

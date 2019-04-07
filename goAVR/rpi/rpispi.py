@@ -8,12 +8,10 @@ class rpispi:
         GPIO.setwarnings(False)
         self.reset=2    
         GPIO.setup(self.reset,GPIO.OUT)
-    
-    def init_spi(self):
         self.spi=spidev.SpiDev()
         self.spi.open(0,0)
-        slef.spi.max_speed_hz = 1000000
-        
+        self.spi.max_speed_hz = 1000000
+            
     def toggle_reset(self):
         GPIO.output(self.reset,GPIO.HIGH)
         sleep(.02)
