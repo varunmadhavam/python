@@ -30,7 +30,7 @@ if sys.argv[1] == "arduino":
 
 elif sys.argv[1] == "rpi":
     chip=rpiavr(0,0,32,0,8192,0,0,20,0,10,hexdata)
-    mode=fsm(1,chip)
+    mode=fsm(2,chip)
     mode.run()
 
 else:

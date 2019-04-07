@@ -19,7 +19,6 @@ class rpiavr:
     def enable_programming(self):
         self.spi.toggle_reset()
         res=self.spi.spi_transfer([0xAC,0x53,0x00,0x00])
-
         if res[2] == 83: #0x53
             print("Programming mode entered successfully")
             return True
@@ -43,17 +42,8 @@ class rpiavr:
         return arr
 
     def chip_erase(self):
-        self.serialport.writeserialdata(b'\x94')
-        data=self.dataqueue.getdata(2)
-        if bytes([data[0]]) == b'\x00':
-            if bytes([data[1]]) == b'\x94':
-                return True
-            else:
-                print("Error : Unexpected return code")
-                return False
-        else:
-            print("error while erasing chip")
-            return False
+        self.spi.spi_transfer([0xAC,0x80,0x00,0x00])
+        return True
 
 
     def write_flash(self):
@@ -95,11 +85,8 @@ class rpiavr:
                    print("error unidentified sync token recieved.")
 
     def read_flash(self):
-        self.serialport.writeserialdata(b'\x97')
-        self.serialport.writeserialdata(bytes(pack(">B",self.flash_size>>8)))
-        self.serialport.writeserialdata(bytes(pack(">B",self.flash_size&0xff)))
         arr = bytearray()
-        for x in range(1,self.flash_size):
-            #arr.append(bytes([self.dataqueue.getdata(1)]))
-            print(self.dataqueue.getdata(1))
-        #print(arr)
+        for x in range(0,int((self.flash_size/2))):
+            arr.append(self.spi.spi_transfer([0x28,int.from_bytes(pack(">B",x>>8),"little"),int.from_bytes(pack(">B",x&0xff),"little"),0x00])[3])
+            arr.append(self.spi.spi_transfer([0x20,int.from_bytes(pack(">B",x>>8),"little"),int.from_bytes(pack(">B",x&0xff),"little"),0x00])[3])
+        return arr

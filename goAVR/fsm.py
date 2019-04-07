@@ -28,9 +28,19 @@ class fsm:
 
     def read_flash(self):
         if self.avr.enable_programming():
-            self.avr.read_flash()
+            print(self.avr.read_flash())
+            self.avr.leave_programming()
         else:
             print("Could not enter programming mode")
+
+    def erase_chip(self):
+        print("chip erase cycle initiated")
+        if self.avr.chip_erase():
+            sleep(self.avr.twd_erase/1000)
+            print("chip erased successfully")
+            self.avr.leave_programming()
+        else:
+            print("Error erasing chip")
 
 
     def run(self):
