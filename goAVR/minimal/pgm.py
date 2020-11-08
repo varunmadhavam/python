@@ -5,7 +5,7 @@ from time import sleep
 
 def enterprogramming(reset,spi):
     GPIO.output(reset,GPIO.HIGH)
-    sleep(1/1000) #must be given positive pulse of at least two CPU clock cycles duration after SCK has been set to “0”. 1ms is order of magnitudes more than what is required at 16Mhz.
+    sleep(1/1000) #must be given positive pulse of at least two CPU clock cycles duration after SCK has been set to “0”. 1ms is order of magnitudes more than what is required at 12Mhz.
     GPIO.output(reset,GPIO.LOW)
     sleep(20/1000) #after pulling Reset low, wait at least 20ms before issuing the first command
     x=spi.xfer([0xAC,0x53,0x00,0x00])
@@ -46,7 +46,7 @@ def loadhex(program,spi):
     i=0 #track pages within the flash
     j=0 #track words within the flash page buffer
     k=0 #track the binary to be programmed
-    spi.xfer([0x4D,0x00,0x00,0x00]) #load the extended address byte with 0 as we have only 256 pages.
+    spi.xfer([0x4D,0x00,0x00,0x00]) #load the extended address byte with 0s.
     while k <= (len(program)-2):
         spi.xfer([0x40,0x00,j,program[k]]) #write the lowbyte of the jth word in ith page
         spi.xfer([0x48,0x00,j,program[k+1]]) #write the highbyte of the jth word in the ith page
@@ -63,7 +63,7 @@ def loadhex(program,spi):
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
-reset=2; #GPIO pin to control the reset pin of the device.
+reset=2; #GPIO pin to control the reset pin of the target device.
 GPIO.setup(reset,GPIO.OUT)
 GPIO.output(reset,GPIO.LOW)
 spi=spidev.SpiDev()
