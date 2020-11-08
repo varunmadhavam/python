@@ -5,9 +5,9 @@ from time import sleep
 
 def enterprogramming(reset,spi):
     GPIO.output(reset,GPIO.HIGH)
-    sleep(1/1000) #must be given positive pulse of at least two CPU clock cycles duration after SCK has been set to “0”. 1ms is order of magnitudes more than what is required at 12Mhz.
+    sleep(1/1000) #Reset must be given positive pulse of at least two CPU clock cycles duration after SCK has been set to “0”. 1ms is order of magnitudes more than what is required at 12Mhz.
     GPIO.output(reset,GPIO.LOW)
-    sleep(20/1000) #after pulling Reset low, wait at least 20ms before issuing the first command
+    sleep(20/1000) #after pulling Reset low, wait at least 20ms before issuing the first command.
     x=spi.xfer([0xAC,0x53,0x00,0x00])
     print(hex(x[0])," ",hex(x[1])," ",hex(x[2])," ",hex(x[3]))
 
@@ -51,15 +51,15 @@ def loadhex(program,spi):
         spi.xfer([0x40,0x00,j,program[k]]) #write the lowbyte of the jth word in ith page
         spi.xfer([0x48,0x00,j,program[k+1]]) #write the highbyte of the jth word in the ith page
         k=k+2 #+2 as we are handling 2 bytes every iteration since each word is 2 bytes.
-        j=j+1
+        j=j+1 #handle the next word.
         if((k%(pagesize_flash*2))==0): # if true we have filled the page buffer. We can load it to page i.
             spi.xfer([0x4c,i>>8,i,0x00]) #load the current page buffer to page i.
-            sleep(twd_flash/1000)
+            sleep(twd_flash/1000) #wait after flash page write.
             j=0 #make the pointer to the flash page buffer to point to the start again.
-            i=i+pagesize_flash #incremnet the fla
-    if j > 0:
+            i=i+pagesize_flash #incremnet the flash pointer by the flash page size which gives the adress of the next flash page.
+    if j > 0: # we have an pagebuffer that is not fully filled. Write it to flash anyway.
         spi.xfer([0x4c,i>>8,i,0x00])
-        sleep(twd_flash/1000)
+        sleep(twd_flash/1000) #wait fater flash page write.
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
