@@ -71,7 +71,7 @@ spi.open(0,0)
 spi.max_speed_hz=2000000 #The minimum low and high periods for the Serial Clock (SCK) input are defined as follows
                          #Low:  2 CPU clock cycles for fck < 12MHz, 3 CPU clock cycles for fck >= 12MHz
                          #High: 2 CPU clock cycles for fck < 12MHz, 3 CPU clock cycles for fck >= 12MHz
-                         # We are running at 16MHZ, so 3 clock high and 3 clock low means f/6 = 12/6 = 2Mhz 
+                         # We are running at 12MHZ, so 3 clock high and 3 clock low means f/6 = 12/6 = 2Mhz 
 
 enterprogramming(reset,spi) #put the chip in programming mode.
 chipid(spi) #prints the chip identification signatures.
