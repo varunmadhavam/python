@@ -59,7 +59,7 @@ def loadhex(program,spi):
             i=i+pagesize_flash #incremnet the flash pointer by the flash page size which gives the adress of the next flash page.
     if j > 0: # we have an pagebuffer that is not fully filled. Write it to flash anyway.
         spi.xfer([0x4c,i>>8,i,0x00])
-        sleep(twd_flash/1000) #wait fater flash page write.
+        sleep(twd_flash/1000) #wait after flash page write.
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
